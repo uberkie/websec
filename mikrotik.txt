@@ -1,0 +1,35 @@
+Connect to your MikroTik router using Winbox or SSH.
+Go to the "IP" menu and select "Firewall" from the submenu.
+In the "Filter Rules" tab, click on the "+" button to create a new rule.
+Set the chain to "input" and action to "drop".
+In the "General" tab, leave the "Src. MAC Address" field empty to match all MAC addresses.
+In the "Action" tab, set the action to "Jump" and choose a new target, for example, "redirect-to-signup".
+Click "OK" to create the filter rule.
+Now, you need to create a rule that redirects the blocked MAC addresses to a sign-up page:
+
+In the "IP" menu, select "Firewall" and go to the "Nat" tab.
+Click on the "+" button to create a new rule.
+Set the chain to "dstnat" and action to "dst-nat".
+In the "General" tab, specify the destination MAC addresses that are approved. For example, if you have approved MAC addresses "AA:BB:CC:DD:EE:FF" and "11:22:33:44:55:66", enter them in the "Dst. MAC Address" field as "AA:BB:CC:DD:EE:FF,11:22:33:44:55:66".
+In the "Action" tab, set the action to "accept" to allow traffic from approved MAC addresses.
+Click "OK" to create the NAT rule.
+Now, you will need to add a final rule that redirects any remaining blocked MAC addresses to the sign-up page:
+
+In the "IP" menu, select "Firewall" and go to the "Nat" tab.
+Click on the "+" button to create a new rule.
+Set the chain to "dstnat" and action to "dst-nat".
+In the "General" tab, leave the "Dst. MAC Address" field empty to match all remaining blocked MAC addresses.
+In the "Action" tab, set the action to "redirect" and specify the redirect target address and port. This could be the IP address and port of your sign-up page. For example, enter the IP address of the sign-up page in the "To Address" field and the port in the "To Ports" field.
+Click "OK" to create the NAT rule.
+These rules will drop all incoming traffic from MAC addresses not in the approved list, allow traffic from approved MAC addresses, and redirect any remaining blocked MAC addresses to the specified sign-up page.
+Note: You do not need to create any additional rules to drop MAC addresses not in the sign-up page's list, because the default rules will do that for you.
+"""
+
+import argparse
+import fcntl
+import struct
+import socket
+import subprocess
+import sys
+
+def get_mac_address(ifname):
